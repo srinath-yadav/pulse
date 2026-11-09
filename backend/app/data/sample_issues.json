@@ -1,0 +1,113 @@
+[
+  {
+    "key": "HLX",
+    "name": "Patient Portal",
+    "client": "Helix Health",
+    "issues": [
+      {
+        "key": "HLX-101",
+        "summary": "SSO login fails for Azure AD users",
+        "status": "Blocked",
+        "priority": "Critical",
+        "assignee": "Ravi",
+        "story_points": 5,
+        "days_open": 9
+      },
+      {
+        "key": "HLX-102",
+        "summary": "Add audit log for role changes",
+        "status": "In Progress",
+        "priority": "High",
+        "assignee": "Arjun",
+        "story_points": 8,
+        "days_open": 4
+      },
+      {
+        "key": "HLX-103",
+        "summary": "Device list pagination",
+        "status": "Done",
+        "priority": "Medium",
+        "assignee": "Anu",
+        "story_points": 3,
+        "days_open": 2
+      },
+      {
+        "key": "HLX-104",
+        "summary": "Approval workflow email notifications",
+        "status": "To Do",
+        "priority": "High",
+        "assignee": null,
+        "story_points": 5,
+        "days_open": 6
+      }
+    ]
+  },
+  {
+    "key": "NWL",
+    "name": "Order Management",
+    "client": "Northwind Logistics",
+    "issues": [
+      {
+        "key": "NWL-201",
+        "summary": "Order sync API timeout",
+        "status": "Blocked",
+        "priority": "High",
+        "assignee": "Kiran",
+        "story_points": 5,
+        "days_open": 12
+      },
+      {
+        "key": "NWL-202",
+        "summary": "Migrate pricing screen to new UI",
+        "status": "In Progress",
+        "priority": "Medium",
+        "assignee": "Divya",
+        "story_points": 8,
+        "days_open": 5
+      },
+      {
+        "key": "NWL-203",
+        "summary": "Export report as Excel",
+        "status": "Done",
+        "priority": "Low",
+        "assignee": "Meena",
+        "story_points": 2,
+        "days_open": 1
+      }
+    ]
+  },
+  {
+    "key": "AUR",
+    "name": "Retail Analytics",
+    "client": "Aurora Retail",
+    "issues": [
+      {
+        "key": "AUR-301",
+        "summary": "Dashboard charts load slowly",
+        "status": "In Progress",
+        "priority": "High",
+        "assignee": "Sahil",
+        "story_points": 5,
+        "days_open": 7
+      },
+      {
+        "key": "AUR-302",
+        "summary": "Add store-level sales filter",
+        "status": "To Do",
+        "priority": "Medium",
+        "assignee": null,
+        "story_points": 3,
+        "days_open": 3
+      },
+      {
+        "key": "AUR-303",
+        "summary": "Fix CSV import encoding issue",
+        "status": "Done",
+        "priority": "Low",
+        "assignee": "Pooja",
+        "story_points": 2,
+        "days_open": 1
+      }
+    ]
+  }
+]
