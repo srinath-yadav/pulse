@@ -39,6 +39,60 @@
         "assignee": null,
         "story_points": 5,
         "days_open": 6
+      },
+      {
+        "key": "HLX-105",
+        "summary": "Session timeout warning dialog",
+        "status": "In Progress",
+        "priority": "Medium",
+        "assignee": "Anu",
+        "story_points": 3,
+        "days_open": 3
+      },
+      {
+        "key": "HLX-106",
+        "summary": "Export appointment history as PDF",
+        "status": "To Do",
+        "priority": "Low",
+        "assignee": "Arjun",
+        "story_points": 3,
+        "days_open": 2
+      },
+      {
+        "key": "HLX-107",
+        "summary": "Consent form versioning",
+        "status": "Blocked",
+        "priority": "High",
+        "assignee": "Ravi",
+        "story_points": 5,
+        "days_open": 5
+      },
+      {
+        "key": "HLX-108",
+        "summary": "Accessibility fixes on intake form",
+        "status": "Done",
+        "priority": "Medium",
+        "assignee": "Anu",
+        "story_points": 2,
+        "days_open": 3
+      },
+      {
+        "key": "HLX-109",
+        "summary": "Role-based menu visibility",
+        "status": "Done",
+        "priority": "High",
+        "assignee": "Arjun",
+        "story_points": 5,
+        "days_open": 4
+      },
+      {
+        "key": "HLX-110",
+        "summary": "Password policy settings screen",
+        "status": "In Progress",
+        "priority": "Medium",
+        "assignee": "Ravi",
+        "story_points": 3,
+        "days_open": 8
       }
     ]
   },
@@ -73,6 +127,51 @@
         "assignee": "Meena",
         "story_points": 2,
         "days_open": 1
+      },
+      {
+        "key": "NWL-204",
+        "summary": "Carrier rate lookup caching",
+        "status": "In Progress",
+        "priority": "High",
+        "assignee": "Kiran",
+        "story_points": 5,
+        "days_open": 6
+      },
+      {
+        "key": "NWL-205",
+        "summary": "Bulk order upload validation",
+        "status": "To Do",
+        "priority": "Medium",
+        "assignee": "Meena",
+        "story_points": 5,
+        "days_open": 3
+      },
+      {
+        "key": "NWL-206",
+        "summary": "Shipment tracking map view",
+        "status": "To Do",
+        "priority": "Low",
+        "assignee": null,
+        "story_points": 8,
+        "days_open": 4
+      },
+      {
+        "key": "NWL-207",
+        "summary": "Invoice rounding error",
+        "status": "Done",
+        "priority": "Critical",
+        "assignee": "Divya",
+        "story_points": 2,
+        "days_open": 2
+      },
+      {
+        "key": "NWL-208",
+        "summary": "Warehouse filter on orders list",
+        "status": "Done",
+        "priority": "Medium",
+        "assignee": "Meena",
+        "story_points": 3,
+        "days_open": 3
       }
     ]
   },
@@ -105,6 +204,60 @@
         "status": "Done",
         "priority": "Low",
         "assignee": "Pooja",
+        "story_points": 2,
+        "days_open": 1
+      },
+      {
+        "key": "AUR-304",
+        "summary": "Weekly sales email digest",
+        "status": "Done",
+        "priority": "Medium",
+        "assignee": "Sahil",
+        "story_points": 5,
+        "days_open": 4
+      },
+      {
+        "key": "AUR-305",
+        "summary": "Returns rate by category chart",
+        "status": "In Progress",
+        "priority": "Medium",
+        "assignee": "Pooja",
+        "story_points": 3,
+        "days_open": 2
+      },
+      {
+        "key": "AUR-306",
+        "summary": "Saved views for regional managers",
+        "status": "To Do",
+        "priority": "Low",
+        "assignee": "Pooja",
+        "story_points": 5,
+        "days_open": 2
+      },
+      {
+        "key": "AUR-307",
+        "summary": "Stock-out alert thresholds",
+        "status": "Done",
+        "priority": "High",
+        "assignee": "Sahil",
+        "story_points": 3,
+        "days_open": 3
+      },
+      {
+        "key": "AUR-308",
+        "summary": "Drill-down from region to store",
+        "status": "Done",
+        "priority": "Medium",
+        "assignee": "Pooja",
+        "story_points": 5,
+        "days_open": 5
+      },
+      {
+        "key": "AUR-309",
+        "summary": "Dark mode for kiosk display",
+        "status": "Done",
+        "priority": "Low",
+        "assignee": "Sahil",
         "story_points": 2,
         "days_open": 1
       }
