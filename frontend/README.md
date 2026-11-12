@@ -1,32 +1,54 @@
-# React + TypeScript + Vite
+# Pulse frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+React dashboard for Pulse. It shows every client's Jira work in one place and requests AI status reports from the Pulse API.
 
-Currently, two official plugins are available:
+## Run it
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Start the backend on port 8000 first (see `../backend/README.md`), then:
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Open http://localhost:5173. In development, Vite forwards `/api/*` to `http://localhost:8000`, so the browser only talks to one origin.
+
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | Start the dev server with hot reload |
+| `npm run build` | Type-check and build for production into `dist/` |
+| `npm run preview` | Serve the production build locally |
+| `npm run lint` | Lint with oxlint |
+
+## Screens
+
+- **Overview:** a headline worked out from the data, the client pulse chart, issues that need attention, and team workload
+- **Client page:** status breakdown, issues as a list or a board, the AI status report and the Ask Pulse panel
+- **Issue drawer:** details, why Pulse flags the issue and the assignee's other open work. Each issue has its own URL, such as `#/clients/HLX/HLX-101`
+- **Search:** ⌘K or Ctrl+K opens a command palette for clients, issues and people
+
+## Code structure
+
+```
+src/
+├── App.tsx            Layout, data loading, hash routing, keyboard shortcuts
+├── api.ts             All calls to the Pulse API, with typed errors
+├── types.ts           Types that mirror the backend's Pydantic models
+├── styles.css         Design tokens (light and dark) and all styles
+├── lib/
+│   ├── health.ts      On track / at risk / blocked rules
+│   ├── status.ts      Status order and labels
+│   └── useTheme.ts    Theme hook, saved in localStorage
+├── pages/
+│   ├── Overview.tsx
+│   └── ProjectPage.tsx
+└── components/        PulseStrip, IssueTable, IssueBoard, IssueDrawer,
+                       ReportPanel, CommandPalette, Workload, Sidebar, ...
+```
+
+## Design notes
+
+- **No UI or chart library.** Charts are plain HTML and CSS, and icons are inline SVG, which keeps the bundle small.
+- **Status is never colour alone.** Every status has a text label, health uses a shape (circle, triangle, square), and the status colours were checked for colour-blind separation.
+- **Explicit UI states.** The report panel moves through idle, loading, ready and error, modelled as one TypeScript union, so the UI cannot show two states at once.
+- **Accessible by default:** keyboard focus is visible, dialogs close with Escape, and animations respect reduced-motion settings.
