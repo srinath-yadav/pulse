@@ -15,6 +15,8 @@ class JiraService:
     def get_project(self, key:str)->Project | None:
         return next((p for p in self.get_projects() if p.key == key.upper()),None)
     
+    def get_blocked(self,key:str)->Project | None:
+        return next((p.issues() for p in self.get_projects() ))
 
 jira_service = JiraService()
     

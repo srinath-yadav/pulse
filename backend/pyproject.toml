@@ -1,7 +1,7 @@
 [project]
 name = "backend"
 version = "0.1.0"
-description = "Add your description here"
+description = "Pulse API: multi-client Jira insights with AI status reports"
 readme = "README.md"
 authors = [
     { name = "Srinath Yadav", email = "srinathsree122@gmail.com" }
