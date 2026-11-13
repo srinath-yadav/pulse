@@ -1,0 +1,4 @@
+Issue key,Summary,Status,Priority,Assignee,Created,Description
+NWL-201,Order sync API timeout,Blocked,High,Kiran,2026-11-01,"Sync job times out when the ERP responds slowly. Fails only between 2 AM and 4 AM IST."
+NWL-204,Carrier rate lookup caching,In Progress,High,Kiran,2026-11-07,"Cache carrier rates for 24 hours to cut external API calls."
+NWL-206,Shipment tracking map view,To Do,Low,,2026-11-09,"Map of live shipments. Deferred until after January peak season."
