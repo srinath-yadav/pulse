@@ -7,7 +7,7 @@ import { IssueDrawer } from "../components/IssueDrawer";
 import { IssueTable } from "../components/IssueTable";
 import { ReportPanel } from "../components/ReportPanel";
 import { StatusBar } from "../components/StatusBar";
-import { progress, projectHealth } from "../lib/health";
+import { projectHealth } from "../lib/health";
 import type { Project } from "../types";
 import { KpiStrip } from "../components/KpiStrip";
 import { deliveryKpis } from "../lib/kpis";
@@ -27,10 +27,10 @@ export function ProjectPage({
 }: Props) {
   const [view, setView] = useState<"list" | "board">("list");
 
-  const points = project.issues.reduce((n, i) => n + (i.story_points ?? 0), 0);
-  const donePoints = project.issues
-    .filter((i) => i.status === "Done")
-    .reduce((n, i) => n + (i.story_points ?? 0), 0);
+  // const points = project.issues.reduce((n, i) => n + (i.story_points ?? 0), 0);
+  // const donePoints = project.issues
+  //   .filter((i) => i.status === "Done")
+  //   .reduce((n, i) => n + (i.story_points ?? 0), 0);
   const selected = project.issues.find((i) => i.key === issueKey) ?? null;
 
   return (
