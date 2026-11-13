@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { CommandPalette } from "./components/CommandPalette";
 import { Sidebar } from "./components/Sidebar";
 import { Topbar } from "./components/Topbar";
@@ -7,6 +7,15 @@ import { Overview } from "./pages/Overview";
 import { ProjectPage } from "./pages/ProjectPage";
 import type { Project } from "./types";
 import { api } from "./api";
+import { ServerStatus } from "./components/ServerStatus";
+import { isOffline } from "./lib/errors";
+
+// The live API runs on a free server that sleeps when idle and takes up to a minute
+// to wake. Keep retrying for that long before showing an error. In dev, fail fast.
+const RETRY_EVERY_MS = 5_000;
+const WAKE_UP_WINDOW_MS = import.meta.env.DEV ? 0 : 90_000;
+const SLOW_AFTER_MS = 4_000;
+const sleep = (ms: number) => new Promise((done) => setTimeout(done, ms));
 
 // Hash routing: #/ = overview, #/clients/HLX = one client, #/clients/HLX/HLX-101 = an issue
 function readRoute() {
@@ -29,16 +38,36 @@ export default function App() {
   const [syncedAt, setSyncedAt] = useState<Date | null>(null);
   const [route, setRoute] = useState(readRoute);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [slow, setSlow] = useState(false);
+  const hasData = useRef(false);
 
   const load = useCallback(async () => {
     setSyncing(true);
+    if (!hasData.current) setStatus("loading");
+    const started = Date.now();
+    const slowTimer = setTimeout(() => setSlow(true), SLOW_AFTER_MS);
     try {
-      setProjects(await api.listProjectDetails());
-      setSyncedAt(new Date());
-      setStatus("ready");
+      for (;;) {
+        try {
+          setProjects(await api.listProjectDetails());
+          hasData.current = true;
+          setSyncedAt(new Date());
+          setStatus("ready");
+          return;
+        } catch (e) {
+          // Only a sleeping or unreachable server is worth waiting for
+          const waited = Date.now() - started;
+          if (!isOffline(e) || waited + RETRY_EVERY_MS > WAKE_UP_WINDOW_MS)
+            throw e;
+          await sleep(RETRY_EVERY_MS);
+        }
+      }
     } catch {
-      setStatus("error");
+      // A failed refresh keeps the data already on screen
+      if (!hasData.current) setStatus("error");
     } finally {
+      clearTimeout(slowTimer);
+      setSlow(false);
       setSyncing(false);
     }
   }, []);
@@ -89,19 +118,8 @@ export default function App() {
           onToggleTheme={toggle}
         />
 
-        {status === "loading" && (
-          <div className="state">Loading your clients…</div>
-        )}
-
-        {status === "error" && (
-          <div className="state">
-            <h2>Pulse can't reach its API</h2>
-            <p className="muted">Start the backend on port 8000, then retry.</p>
-            <button className="btn btn-primary" onClick={load}>
-              Retry
-            </button>
-          </div>
-        )}
+        {status === "loading" && <ServerStatus mode="waking" slow={slow} />}
+        {status === "error" && <ServerStatus mode="down" onRetry={load} />}
 
         {status === "ready" && route.client && !active && (
           <div className="state">

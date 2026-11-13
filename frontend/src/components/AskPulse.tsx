@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { api, ApiError } from "../api";
+import { api } from "../api";
+import { friendlyError } from "../lib/errors";
 import type { ToolCallLog } from "../types";
 import { Icon } from "./Icon";
 
@@ -67,15 +68,7 @@ export function AskPulse({ client, projectKey }: Props) {
         },
       ]);
     } catch (e) {
-      const text =
-        e instanceof ApiError && e.status === 503 ?
-          "Ask Pulse needs an LLM. Set LLM_PROVIDER=openai_compatible in backend/.env and restart the API."
-        : e instanceof ApiError && e.status === 404 ?
-          "The /ask endpoint isn't running yet. Restart the backend."
-        : e instanceof ApiError && e.status === 429 ?
-          "You've reached the demo limit. Try again in a while."
-        : "Pulse couldn't answer that. Try again in a moment.";
-
+      const text = friendlyError(e, "ask");
       setTurns((t) => [...t, { role: "error", text }]);
     } finally {
       setBusy(false);
