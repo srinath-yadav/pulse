@@ -1,0 +1,18 @@
+services:
+  db:
+    image: pgvector/pgvector:pg17 # PostgreSQL 17 with the pgvector extension installed
+    environment:
+      POSTGRES_USER: pulse
+      POSTGRES_PASSWORD: pulse # local development only
+      POSTGRES_DB: pulse
+    ports:
+      - "5433:5432" # 5433 on your Mac, so it won't clash with another Postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data # data survives container restarts
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pulse"]
+      interval: 5s
+      retries: 5
+
+volumes:
+  pgdata:
