@@ -36,3 +36,16 @@ export interface ProjectReport {
   risk_level: "low" | "medium" | "high";
   est_completion_days: number;
 }
+
+// Ask Pulse agent (backend: POST /ask)
+export interface ToolCallLog {
+  name: string;
+  arguments: string;
+  ok: boolean;
+}
+
+export interface AskResponse {
+  answer: string;
+  tool_calls: ToolCallLog[];
+  steps: number;
+}

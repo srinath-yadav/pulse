@@ -1,4 +1,9 @@
-import type { Project, ProjectReport, ProjectSummary } from "./types";
+import type {
+  AskResponse,
+  Project,
+  ProjectReport,
+  ProjectSummary,
+} from "./types";
 
 // Vite proxies /api to the FastAPI backend (see vite.config.ts)
 const BASE = "/api";
@@ -36,4 +41,10 @@ export const api = {
 
   generateReport: (key: string) =>
     request<ProjectReport>(`/projects/${key}/report`, { method: "POST" }),
+
+  ask: (question: string, projectKey?: string) =>
+    request<AskResponse>("/ask", {
+      method: "POST",
+      body: JSON.stringify({ question, project_key: projectKey ?? null }),
+    }),
 };
