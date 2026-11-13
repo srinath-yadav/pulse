@@ -1487,3 +1487,7 @@ h3 {
     transition: none !important;
   }
 }
+
+.trace.sources::before {
+  content: none;
+}

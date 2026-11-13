@@ -48,4 +48,5 @@ export interface AskResponse {
   answer: string;
   tool_calls: ToolCallLog[];
   steps: number;
+  sources: string[];
 }

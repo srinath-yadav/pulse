@@ -51,3 +51,10 @@ class AskResponse(BaseModel):
     answer: str
     tool_calls: list[ToolCallLog]
     steps: int
+    sources: list[str] = []  # document files cited in the answer
+    
+class DocHit(BaseModel):
+    source: str    # file, e.g. HLX/weekly-sync-2026-11-10.md
+    heading: str   # "Document title > Section"
+    content: str
+    score: float   # cosine similarity: 1.0 = same meaning, near 0 = unrelated

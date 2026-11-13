@@ -8,6 +8,7 @@ from collections import Counter
 from typing import Any, Callable
 
 from app.services.jira_service import jira_service
+from app.rag.search import search_docs
 
 STALE_DAYS = 7
 
@@ -67,6 +68,10 @@ def get_workload(project_key: str | None = None) -> list[dict[str, Any]]:
                 blocked_count[name] += 1
     return [{"person": n, "open_issues": c, "blocked": blocked_count[n]} for n, c in open_count.most_common()]
 
+def search_documents(query: str, project_key: str | None = None) -> list[dict[str, Any]]:
+    """RAG: the project passages closest in meaning to the query, with their source files."""
+    hits = search_docs(query, project_key=project_key, limit=4)
+    return [{"source": h.source, "section": h.heading, "text": h.content, "score": h.score} for h in hits]
 
 # Name -> function. The LLM can only call what is listed here.
 TOOLS: dict[str, Callable[..., Any]] = {
@@ -74,6 +79,7 @@ TOOLS: dict[str, Callable[..., Any]] = {
     "get_project_issues": get_project_issues,
     "find_attention_issues": find_attention_issues,
     "get_workload": get_workload,
+        "search_documents": search_documents,
 }
 
 _PROJECT_KEY = {"type": "string", "description": "Project key such as HLX. Omit for all clients."}
@@ -101,6 +107,16 @@ TOOL_SCHEMAS = [
         "name": "get_workload",
         "description": "Count open and blocked issues per person, busiest first.",
         "parameters": {"type": "object", "properties": {"project_key": _PROJECT_KEY}},
+    }},
+        {"type": "function", "function": {
+        "name": "search_documents",
+        "description": ("Search project documents (meeting notes, specs, security reviews, spreadsheets) "
+                        "for reasons, decisions, dates, contacts and requirements that are not in Jira. "
+                        "Returns the most relevant passages with their source file."),
+        "parameters": {"type": "object", "properties": {
+            "query": {"type": "string", "description": "What to look for, in plain words."},
+            "project_key": _PROJECT_KEY,
+        }, "required": ["query"]},
     }},
 ]
 

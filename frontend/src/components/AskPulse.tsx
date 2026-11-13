@@ -15,11 +15,12 @@ const TOOL_LABELS: Record<string, string> = {
   get_project_issues: "read issues",
   find_attention_issues: "checked blocked and stale work",
   get_workload: "checked workload",
+  search_documents: "searched project documents",
 };
 
 type Turn =
   | { role: "user"; text: string }
-  | { role: "pulse"; text: string; tools: ToolCallLog[] }
+  | { role: "pulse"; text: string; tools: ToolCallLog[]; sources: string[] }
   | { role: "error"; text: string };
 
 interface Props {
@@ -58,7 +59,12 @@ export function AskPulse({ client, projectKey }: Props) {
       const res = await api.ask(q, projectKey);
       setTurns((t) => [
         ...t,
-        { role: "pulse", text: res.answer, tools: res.tool_calls },
+        {
+          role: "pulse",
+          text: res.answer,
+          tools: res.tool_calls,
+          sources: res.sources ?? [],
+        },
       ]);
     } catch (e) {
       const text =
@@ -98,7 +104,7 @@ export function AskPulse({ client, projectKey }: Props) {
         <>
           <p className="muted small">
             Ask anything about {client} or your other clients. Pulse looks it up
-            in Jira and changes nothing.
+            in Jira and your project documents, and changes nothing.
           </p>
           <div className="chips">
             {SUGGESTIONS.map((s) => (
@@ -124,6 +130,9 @@ export function AskPulse({ client, projectKey }: Props) {
                     ),
                   ].join(", ")}
                 </p>
+              )}
+              {t.role === "pulse" && t.sources.length > 0 && (
+                <p className="trace sources">Sources: {t.sources.join(", ")}</p>
               )}
             </div>
           ))}
