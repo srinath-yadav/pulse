@@ -35,3 +35,19 @@ class ProjectReport(BaseModel):
     blockers: list[str] = Field(default_factory=list, max_length=5)
     risk_level: Literal["low", "medium", "high"]
     est_completion_days: int = Field(ge=0, le=365)
+    
+class AskRequest(BaseModel):
+    question: str = Field(min_length=1, max_length=500)
+    project_key: str | None = None
+
+
+class ToolCallLog(BaseModel):
+    name: str
+    arguments: str
+    ok: bool
+
+
+class AskResponse(BaseModel):
+    answer: str
+    tool_calls: list[ToolCallLog]
+    steps: int

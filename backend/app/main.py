@@ -3,7 +3,7 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import projects
+from app.routers import projects,ask
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 
@@ -17,7 +17,7 @@ app.add_middleware(
 )
 
 app.include_router(projects.router)
-
+app.include_router(ask.router)
 
 @app.get("/health")
 def health():
