@@ -115,7 +115,7 @@ export function AskPulse({ client, projectKey }: Props) {
       : <div className="thread" aria-live="polite">
           {turns.map((t, i) => (
             <div key={i} className={`bubble bubble-${t.role}`}>
-              <p>renderText(t.text)</p>
+              <p>{renderText(t.text)}</p>
               {t.role === "pulse" && t.tools.length > 0 && (
                 <p className="trace">
                   {[
