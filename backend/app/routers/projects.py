@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from app.models import Project, ProjectReport, ProjectSummary
 from app.services.jira_service import jira_service
 from app.services.report_service import ReportError, ReportGenerator, get_report_generator
-from backend.app.rate_limit import limit_ai_requests
+from app.rate_limit import limit_ai_requests
 
 logger = logging.getLogger(__name__)
 

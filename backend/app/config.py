@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     llm_base_url: str = "https://api.groq.com/openai/v1"
         # PostgreSQL with pgvector (docker compose up -d db)
     database_url: str = "postgresql://pulse:pulse@localhost:5433/pulse"
+    cors_origins: list[str] = ["http://localhost:5173"]
 
 
 @lru_cache  # read the settings once, then reuse them

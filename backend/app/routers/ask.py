@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from app.models import AskRequest, AskResponse
 from app.services.agent_service import AgentError, PulseAgent, get_agent
-from backend.app.rate_limit import limit_ai_requests
+from app.rate_limit import limit_ai_requests
 
 logger = logging.getLogger(__name__)
 
