@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from app.models import Project, ProjectReport, ProjectSummary
 from app.services.jira_service import jira_service
 from app.services.report_service import ReportError, ReportGenerator, get_report_generator
+from backend.app.rate_limit import limit_ai_requests
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +38,7 @@ def get_project(key: str):
     return find_project(key)
 
 
-@router.post("/{key}/report", response_model=ProjectReport)
+@router.post("/{key}/report", response_model=ProjectReport,dependencies=[Depends(limit_ai_requests)])
 async def generate_report(key: str, generator: ReportGenerator = Depends(get_report_generator)):
     project = find_project(key)
     try:

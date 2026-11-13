@@ -72,7 +72,10 @@ export function AskPulse({ client, projectKey }: Props) {
           "Ask Pulse needs an LLM. Set LLM_PROVIDER=openai_compatible in backend/.env and restart the API."
         : e instanceof ApiError && e.status === 404 ?
           "The /ask endpoint isn't running yet. Restart the backend."
+        : e instanceof ApiError && e.status === 429 ?
+          "You've reached the demo limit. Try again in a while."
         : "Pulse couldn't answer that. Try again in a moment.";
+
       setTurns((t) => [...t, { role: "error", text }]);
     } finally {
       setBusy(false);

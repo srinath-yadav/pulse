@@ -6,7 +6,8 @@ import type {
 } from "./types";
 
 // Vite proxies /api to the FastAPI backend (see vite.config.ts)
-const BASE = "/api";
+// Dev: Vite proxies /api to FastAPI. Production: VITE_API_URL is the backend's address.
+const BASE = import.meta.env.VITE_API_URL ?? "/api";
 
 export class ApiError extends Error {
   status: number;
