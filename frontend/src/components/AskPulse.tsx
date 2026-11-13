@@ -27,6 +27,17 @@ interface Props {
   projectKey: string;
 }
 
+// Render the little Markdown LLMs use anyway: **bold**. Everything else stays plain text.
+function renderText(text: string) {
+  return text
+    .split(/(\*\*[^*]+\*\*)/g)
+    .map((part, i) =>
+      part.startsWith("**") && part.endsWith("**") ?
+        <strong key={i}>{part.slice(2, -2)}</strong>
+      : part,
+    );
+}
+
 export function AskPulse({ client, projectKey }: Props) {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [input, setInput] = useState("");
@@ -104,7 +115,7 @@ export function AskPulse({ client, projectKey }: Props) {
       : <div className="thread" aria-live="polite">
           {turns.map((t, i) => (
             <div key={i} className={`bubble bubble-${t.role}`}>
-              <p>{t.text}</p>
+              <p>renderText(t.text)</p>
               {t.role === "pulse" && t.tools.length > 0 && (
                 <p className="trace">
                   {[
