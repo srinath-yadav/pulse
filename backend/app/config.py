@@ -9,10 +9,16 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    llm_provider: Literal["offline", "anthropic"] = "offline"
-    anthropic_api_key: str | None = None
+    llm_provider: Literal["offline", "anthropic", "openai_compatible"] = "offline"
     llm_model: str = "claude-haiku-5-5"
     llm_timeout_seconds: float = 30
+
+    # Anthropic
+    anthropic_api_key: str | None = None
+
+    # Any OpenAI-compatible API: Groq, OpenRouter, Gemini, Ollama
+    llm_api_key: str | None = None
+    llm_base_url: str = "https://api.groq.com/openai/v1"
 
 
 @lru_cache  # read the settings once, then reuse them

@@ -4,7 +4,8 @@ import time
 from functools import lru_cache
 from typing import Protocol
 
-from anthropic import APIError, AsyncAnthropic
+from anthropic import APIError as AnthropicAPIError, AsyncAnthropic
+from openai import APIError as OpenAIAPIError, AsyncOpenAI
 from pydantic import ValidationError
 
 from app.config import get_settings
@@ -55,6 +56,8 @@ class OfflineReportGenerator:
         )
 
 
+# ---------- Shared by every LLM provider ----------
+
 SYSTEM_PROMPT = f"""You are a delivery analyst at a software services company.
 You write short status reports for project managers from Jira data.
 Rules:
@@ -64,12 +67,27 @@ Rules:
 - risk_level: high if anything is blocked, medium if open work is {STALE_DAYS} or more days old, otherwise low.
 - est_completion_days: estimate from the remaining story points, assuming about {POINTS_PER_DAY} points per day."""
 
-REPORT_TOOL = {
-    "name": "submit_report",
-    "description": "Submit the project status report.",
-    "input_schema": ProjectReport.model_json_schema(),
-}
+REPORT_TOOL_NAME = "submit_report"
+REPORT_TOOL_DESCRIPTION = "Submit the project status report."
+REPORT_SCHEMA = ProjectReport.model_json_schema()
 
+
+def build_user_prompt(project: Project) -> str:
+    issues_json = json.dumps([i.model_dump() for i in project.issues], indent=2)
+    return (
+        f"Project: {project.name} for {project.client}\n\n"
+        f"<issues>\n{issues_json}\n</issues>\n\nWrite the status report."
+    )
+
+
+def log_usage(provider: str, project: Project, model: str, tokens_in, tokens_out, started: float) -> None:
+    logger.info(
+        "report provider=%s project=%s model=%s input_tokens=%s output_tokens=%s latency_ms=%d",
+        provider, project.key, model, tokens_in, tokens_out, (time.perf_counter() - started) * 1000,
+    )
+
+
+# ---------- Anthropic (Claude) ----------
 
 class AnthropicReportGenerator:
     def __init__(self, api_key: str, model: str, timeout: float):
@@ -78,30 +96,23 @@ class AnthropicReportGenerator:
         self.model = model
 
     async def generate(self, project: Project) -> ProjectReport:
-        issues_json = json.dumps([i.model_dump() for i in project.issues], indent=2)
         started = time.perf_counter()
         try:
             response = await self.client.messages.create(
                 model=self.model,
                 max_tokens=800,
                 system=SYSTEM_PROMPT,
-                tools=[REPORT_TOOL],
-                # Force Claude to answer by "calling" our tool, so the reply is JSON in our schema
-                tool_choice={"type": "tool", "name": "submit_report"},
-                messages=[{
-                    "role": "user",
-                    "content": f"Project: {project.name} for {project.client}\n\n"
-                               f"<issues>\n{issues_json}\n</issues>\n\nWrite the status report.",
-                }],
+                tools=[{"name": REPORT_TOOL_NAME, "description": REPORT_TOOL_DESCRIPTION,
+                        "input_schema": REPORT_SCHEMA}],
+                # Force a reply as a tool call, so it is JSON in our schema
+                tool_choice={"type": "tool", "name": REPORT_TOOL_NAME},
+                messages=[{"role": "user", "content": build_user_prompt(project)}],
             )
-        except APIError as e:
+        except AnthropicAPIError as e:
             raise ReportError(f"LLM call failed: {e}") from e
 
-        logger.info(
-            "report project=%s model=%s input_tokens=%s output_tokens=%s latency_ms=%d",
-            project.key, self.model, response.usage.input_tokens,
-            response.usage.output_tokens, (time.perf_counter() - started) * 1000,
-        )
+        log_usage("anthropic", project, self.model,
+                  response.usage.input_tokens, response.usage.output_tokens, started)
 
         tool_call = next((b for b in response.content if b.type == "tool_use"), None)
         if tool_call is None:
@@ -112,13 +123,68 @@ class AnthropicReportGenerator:
             raise ReportError(f"LLM returned an invalid report: {e}") from e
 
 
+# ---------- Any OpenAI-compatible API (Groq, OpenRouter, Gemini, Ollama) ----------
+
+class OpenAICompatibleReportGenerator:
+    def __init__(self, api_key: str, base_url: str, model: str, timeout: float):
+        self.client = AsyncOpenAI(api_key=api_key, base_url=base_url, timeout=timeout, max_retries=2)
+        self.model = model
+
+    async def generate(self, project: Project) -> ProjectReport:
+        started = time.perf_counter()
+        try:
+            response = await self.client.chat.completions.create(
+                model=self.model,
+                max_tokens=800,
+                temperature=0.2,  # low: consistent, factual output
+                messages=[
+                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "user", "content": build_user_prompt(project)},
+                ],
+                tools=[{"type": "function", "function": {
+                    "name": REPORT_TOOL_NAME,
+                    "description": REPORT_TOOL_DESCRIPTION,
+                    "parameters": REPORT_SCHEMA,
+                }}],
+                # Force a reply as a tool call, so it is JSON in our schema
+                tool_choice={"type": "function", "function": {"name": REPORT_TOOL_NAME}},
+            )
+        except OpenAIAPIError as e:
+            raise ReportError(f"LLM call failed: {e}") from e
+
+        usage = response.usage
+        log_usage("openai_compatible", project, self.model,
+                  usage.prompt_tokens if usage else None,
+                  usage.completion_tokens if usage else None, started)
+
+        tool_calls = response.choices[0].message.tool_calls
+        if not tool_calls:
+            raise ReportError("LLM did not return a report")
+        try:
+            # Here the arguments arrive as a JSON string, so validate it as JSON
+            return ProjectReport.model_validate_json(tool_calls[0].function.arguments)
+        except ValidationError as e:
+            raise ReportError(f"LLM returned an invalid report: {e}") from e
+
+
+# ---------- Pick the provider from settings ----------
+
 @lru_cache  # build the generator once and reuse its HTTP client
 def get_report_generator() -> ReportGenerator:
     settings = get_settings()
+
     if settings.llm_provider == "anthropic":
         if not settings.anthropic_api_key:
             raise RuntimeError("LLM_PROVIDER is 'anthropic' but ANTHROPIC_API_KEY is not set")
         return AnthropicReportGenerator(
             settings.anthropic_api_key, settings.llm_model, settings.llm_timeout_seconds
         )
+
+    if settings.llm_provider == "openai_compatible":
+        if not settings.llm_api_key:
+            raise RuntimeError("LLM_PROVIDER is 'openai_compatible' but LLM_API_KEY is not set")
+        return OpenAICompatibleReportGenerator(
+            settings.llm_api_key, settings.llm_base_url, settings.llm_model, settings.llm_timeout_seconds
+        )
+
     return OfflineReportGenerator()
