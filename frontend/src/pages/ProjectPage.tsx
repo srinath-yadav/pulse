@@ -9,6 +9,8 @@ import { ReportPanel } from "../components/ReportPanel";
 import { StatusBar } from "../components/StatusBar";
 import { progress, projectHealth } from "../lib/health";
 import type { Project } from "../types";
+import { KpiStrip } from "../components/KpiStrip";
+import { deliveryKpis } from "../lib/kpis";
 
 interface Props {
   project: Project;
@@ -43,16 +45,19 @@ export function ProjectPage({
             <HealthBadge health={projectHealth(project)} />
           </div>
           <p className="muted">
-            {project.name}, {progress(project)}% of issues delivered
+            <p className="muted">{project.name}</p>
           </p>
         </div>
       </header>
-
+      <KpiStrip
+        kpis={deliveryKpis(project.issues)}
+        label={`${project.client} KPIs`}
+      />
       <section className="card">
         <div className="card-head">
           <h2>Where the work stands</h2>
           <span className="muted small">
-            {donePoints} of {points} story points done
+            <span className="muted small">{project.issues.length} issues</span>
           </span>
         </div>
         <StatusBar issues={project.issues} />

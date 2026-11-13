@@ -5,6 +5,8 @@ import { StatusLegend } from "../components/StatusBar";
 import { Workload } from "../components/Workload";
 import { greeting, isOpen, isStale, projectHealth } from "../lib/health";
 import type { Issue, Project } from "../types";
+import { KpiStrip } from "../components/KpiStrip";
+import { deliveryKpis } from "../lib/kpis";
 
 interface Props {
   projects: Project[];
@@ -53,29 +55,42 @@ export function Overview({ projects, onOpen }: Props) {
         <h1>{title}</h1>
         <p className="hero-detail">{detail}</p>
       </header>
+      <KpiStrip kpis={deliveryKpis(all)} label="Portfolio KPIs" />
 
       <section className="card">
         <div className="card-head">
           <div>
             <h2>Client pulse</h2>
-            <p className="muted small">One bar per issue. Taller bars have been open longer.</p>
+            <p className="muted small">
+              One bar per issue. Taller bars have been open longer.
+            </p>
           </div>
           <StatusLegend />
         </div>
         <div className="pulse-rows">
           {projects.map((p) => {
             const open = p.issues.filter(isOpen).length;
-            const blocked = p.issues.filter((i) => i.status === "Blocked").length;
+            const blocked = p.issues.filter(
+              (i) => i.status === "Blocked",
+            ).length;
             return (
               <div key={p.key} className="pulse-row">
                 <button className="pulse-name" onClick={() => onOpen(p.key)}>
                   <span className="strong">{p.client}</span>
                   <span className="muted small">{p.name}</span>
                 </button>
-                <PulseStrip issues={p.issues} maxAge={maxAge} onPick={(i) => onOpen(p.key, i.key)} />
+                <PulseStrip
+                  issues={p.issues}
+                  maxAge={maxAge}
+                  onPick={(i) => onOpen(p.key, i.key)}
+                />
                 <div className="pulse-nums">
-                  <span><b>{open}</b> open</span>
-                  <span className={blocked ? "tone-blocked" : "muted"}><b>{blocked}</b> blocked</span>
+                  <span>
+                    <b>{open}</b> open
+                  </span>
+                  <span className={blocked ? "tone-blocked" : "muted"}>
+                    <b>{blocked}</b> blocked
+                  </span>
                 </div>
                 <HealthBadge health={projectHealth(p)} />
               </div>
@@ -90,29 +105,42 @@ export function Overview({ projects, onOpen }: Props) {
             <h2>Needs your attention</h2>
             <span className="muted small">Blocked, or open a week or more</span>
           </div>
-          {attention.length === 0 ? (
+          {attention.length === 0 ?
             <p className="empty">All clear. Nothing is blocked or stale.</p>
-          ) : (
-            <ul className="attention">
+          : <ul className="attention">
               {attention.map(({ project, issue, reason }) => (
                 <li key={issue.key}>
-                  <button className="attention-row" onClick={() => onOpen(project.key, issue.key)}>
+                  <button
+                    className="attention-row"
+                    onClick={() => onOpen(project.key, issue.key)}>
                     <span className={`attention-icon is-${reason}`}>
-                      <HealthShape health={reason === "blocked" ? "blocked" : "risk"} size={11} />
+                      <HealthShape
+                        health={reason === "blocked" ? "blocked" : "risk"}
+                        size={11}
+                      />
                     </span>
                     <span className="attention-text">
                       <span className="attention-title">{issue.summary}</span>
-                      <span className="muted small">{project.client}, {issue.key}{issue.assignee ? `, ${issue.assignee}` : ", unassigned"}</span>
+                      <span className="muted small">
+                        {project.client}, {issue.key}
+                        {issue.assignee ?
+                          `, ${issue.assignee}`
+                        : ", unassigned"}
+                      </span>
                     </span>
-                    <span className={`attention-why ${reason === "blocked" ? "tone-blocked" : "tone-risk"}`}>
-                      {reason === "blocked" ? "Blocked" : "Stale"} {issue.days_open} days
+                    <span
+                      className={`attention-why ${reason === "blocked" ? "tone-blocked" : "tone-risk"}`}>
+                      {reason === "blocked" ? "Blocked" : "Stale"}{" "}
+                      {issue.days_open} days
                     </span>
-                    <span className="muted"><Icon name="chevron" /></span>
+                    <span className="muted">
+                      <Icon name="chevron" />
+                    </span>
                   </button>
                 </li>
               ))}
             </ul>
-          )}
+          }
         </section>
 
         <Workload issues={all} />
