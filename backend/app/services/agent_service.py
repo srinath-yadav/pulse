@@ -23,7 +23,9 @@ Answer questions by calling the tools. Rules:
 - Jira tools give status and numbers. For why, when, who decided, contacts or requirements, call search_documents.
 - When a fact comes from a document, cite it right after the fact as [source], for example [HLX/weekly-sync-2026-11-10.md].
 - If the documents don't contain the answer, say so. Don't guess.
-- Answer in plain text: at most 5 short sentences or a short list. No tables."""
+- Answer in plain text: at most 5 short sentences or a short list. No tables.
+- If a search finds nothing relevant, don't search again with similar words. Say the documents don't cover it.
+"""
 
 
 class AgentError(Exception):
@@ -44,14 +46,20 @@ class PulseAgent:
         calls: list[ToolCallLog] = []
         retrieved: list[str] = []  # source files returned by search_documents
         started = time.perf_counter()
-
+        last_step = step == MAX_STEPS
+        if last_step:
+                messages.append({
+                    "role": "user",
+                    "content": "You have no tool calls left. Answer now using only what the tools returned. "
+                               "If that isn't enough, say what's missing.",
+                })
         for step in range(1, MAX_STEPS + 1):
             try:
                 response = await self.client.chat.completions.create(
                     model=self.model,
                     messages=messages,
                     tools=TOOL_SCHEMAS,
-                    tool_choice="auto",  # the model decides: call a tool, or answer
+                    tool_choice="none" if last_step else "auto",  # the model decides: call a tool, or answer
                     temperature=0.2,
                     max_tokens=2000,  # reasoning models spend tokens thinking before they answer
                 )

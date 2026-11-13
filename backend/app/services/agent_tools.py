@@ -68,10 +68,16 @@ def get_workload(project_key: str | None = None) -> list[dict[str, Any]]:
                 blocked_count[name] += 1
     return [{"person": n, "open_issues": c, "blocked": blocked_count[n]} for n, c in open_count.most_common()]
 
-def search_documents(query: str, project_key: str | None = None) -> list[dict[str, Any]]:
+MIN_SCORE = 0.6  # tuned from test queries: relevant hits ~0.7, unrelated ~0.56
+
+
+def search_documents(query: str, project_key: str | None = None) -> list[dict[str, Any]] | dict[str, Any]:
     """RAG: the project passages closest in meaning to the query, with their source files."""
-    hits = search_docs(query, project_key=project_key, limit=4)
-    return [{"source": h.source, "section": h.heading, "text": h.content, "score": h.score} for h in hits]
+    hits = [h for h in search_docs(query, project_key=project_key, limit=4) if h.score >= MIN_SCORE]
+    if not hits:
+        return {"results": [], "note": "No passage matches this well. The project documents probably don't cover it."}
+    # Only "source" identifies the passage, so the model cites the file name we can trace.
+    return [{"source": h.source, "text": h.content, "score": h.score} for h in hits]
 
 # Name -> function. The LLM can only call what is listed here.
 TOOLS: dict[str, Callable[..., Any]] = {
