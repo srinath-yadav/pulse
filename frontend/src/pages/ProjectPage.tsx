@@ -83,9 +83,9 @@ export function ProjectPage({
         </section>
 
         <div className="side">
-          <ReportPanel key={project.key} projectKey={project.key} />
+          <ReportPanel key={`report-${project.key}`} projectKey={project.key} />
           <AskPulse
-            key={project.key}
+            key={`ask-${project.key}`}
             client={project.client}
             projectKey={project.key}
           />

@@ -4,6 +4,9 @@
 
 Pulse brings Jira projects from many clients into one view, shows what is blocked or going stale, writes status reports with an LLM, and answers questions like *"Why is HLX-101 blocked, and when will it be fixed?"* using both Jira data and the project's own documents, with cited sources.
 
+**Live demo:** https://pulse.srinathyadav.dev
+(The API runs on a free tier and sleeps when idle, so the first load can take up to a minute.)
+
 ![Pulse overview](docs/pulse-overview.png)
 
 > Pulse runs on sample data for three made-up clients, so it can be demoed without access to a real Jira site.
